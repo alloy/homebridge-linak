@@ -24,13 +24,15 @@ export class LinakDeskControlPlatform implements DynamicPlatformPlugin {
   // this is used to track restored cached accessories
   public readonly accessories: LinakDeskPlatformAccessory[] = [];
 
+  public readonly config: LinakDeskControlPlatformConfig;
   public readonly bluetooth: deskbluez.Bluetooth;
 
   constructor(
     public readonly log: Logger,
-    public readonly config: LinakDeskControlPlatformConfig,
+    config: PlatformConfig,
     public readonly api: API,
   ) {
+    this.config = config as LinakDeskControlPlatformConfig;
     this.bluetooth = new deskbluez.Bluetooth();
     this.log.debug('Finished initializing platform:', this.config.name);
     this.log.debug('Desks:', JSON.stringify(this.config.desks));
