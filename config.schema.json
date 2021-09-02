@@ -5,11 +5,27 @@
   "schema": {
     "type": "object",
     "properties": {
-      "name": {
-        "title": "Name",
-        "type": "string",
-        "required": true,
-        "default": "Example Dynamic Platform"
+      "desks": {
+        "type": "array",
+        "items": {
+          "title": "Desk",
+          "type": "object",
+          "name": {
+            "title": "Name",
+            "type": "string",
+            "required": true
+          },
+          "address": {
+            "title": "Address",
+            "type": "string",
+            "required": true
+          },
+          "modelName": {
+            "title": "Model Name",
+            "type": "string",
+            "required": true
+          }
+        }
       }
     }
   }
