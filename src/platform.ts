@@ -64,6 +64,7 @@ export class LinakDeskControlPlatform implements DynamicPlatformPlugin {
       if (accessory) {
         this.log.info('Restoring existing desk accessory from cache:', accessory.displayName);
         // TODO: this.setupAccessory(accessory); Is this necessary or what is cached?
+        this.setupAccessory(accessory);
       } else {
         this.log.info('Adding new desk accessory:', desk.name);
         accessory = new this.api.platformAccessory<DeskConfig>(desk.name, uuid);
@@ -85,23 +86,32 @@ export class LinakDeskControlPlatform implements DynamicPlatformPlugin {
     if (accInfo) {
       accInfo.setCharacteristic(hap.Characteristic.Manufacturer, 'Linak');
       accInfo.setCharacteristic(hap.Characteristic.Model, accessory.context.modelName);
+      accInfo.setCharacteristic(hap.Characteristic.SerialNumber, accessory.context.address);
+      accInfo.setCharacteristic(hap.Characteristic.FirmwareRevision, 'REPLACE WITH VERSION');
+    }
+
+    let service = accessory.getService(hap.Service.WindowCovering);
+    if (service) {
+      this.log.debug('Removing existing desk service');
+      accessory.removeService(service);
     }
 
     /**
      * Working with blinds, taken from https://github.com/dxdc/homebridge-blinds/blob/master/index.js
      */
-    const service = new hap.Service.WindowCovering(accessory.context.name);
+    service = new hap.Service.WindowCovering(accessory.context.name);
     service.getCharacteristic(hap.Characteristic.CurrentPosition).on('get', async (callback) => {
-      const desk = await this.connectDesk(accessory.context);
-      const state = await desk.state();
-      await desk.disconnect();
-      callback(null, state.cm);
+      // const desk = await this.connectDesk(accessory.context);
+      // const state = await desk.state();
+      // await desk.disconnect();
+      // callback(null, state.cm);
+      callback(null, 60);
     });
     service
       .getCharacteristic(hap.Characteristic.TargetPosition)
       .on('get', (callback) => {
         this.log.info('Get desk target height');
-        callback(null, undefined);
+        callback(null, 60);
       })
       .on('set', (value) => {
         this.log.info('Set desk target height:', value.valueOf());

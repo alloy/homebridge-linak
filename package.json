@@ -20,8 +20,10 @@
   "scripts": {
     "lint": "eslint src/**.ts --max-warnings=0",
     "watch": "npm run build && npm link && nodemon",
-    "build": "rimraf ./dist && tsc",
-    "prepublishOnly": "npm run lint && npm run build"
+    "build": "tsc",
+    "build:reload": "runuser -u pi -- npm run build && hb-service restart",
+    "build:clean": "rimraf ./dist && npm run build",
+    "prepublishOnly": "npm run lint && npm run build:clean"
   },
   "keywords": [
     "homebridge-plugin"
