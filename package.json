@@ -20,7 +20,7 @@
   "scripts": {
     "lint": "eslint src/**.ts --max-warnings=0",
     "watch": "npm run build && npm link && nodemon",
-    "build": "tsc && sed -i '' \"s/REPLACE WITH VERSION/$(node -e 'console.log(require(\"./package.json\").version)').$(git rev-parse --short HEAD)/g\" dist/constants.js",
+    "build": "tsc && sed -i '' \"s/REPLACE WITH VERSION/$(git rev-parse --short HEAD)/g\" dist/constants.js",
     "build:commit": "([ -z \"$(git status -s)\" ] || (echo '[!] Commit changes' && exit 1)) && npm run build && git commit ./dist -m \"Build $(node -e 'console.log(require(\"./dist/constants\").VERSION)')\"",
     "build:deploy": "npm run build:commit && git push && ssh pi@192.168.1.155 'cd ~/homebridge-linak && git pull && sudo hb-service restart'",
     "build:clean": "rimraf ./dist && npm run build",
