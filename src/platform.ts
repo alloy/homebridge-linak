@@ -1,6 +1,6 @@
 import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic, PlatformAccessoryEvent } from 'homebridge';
 
-import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
+import { PLATFORM_NAME, PLUGIN_NAME, VERSION } from './constants';
 
 import * as deskbluez from 'deskbluez';
 
@@ -87,7 +87,7 @@ export class LinakDeskControlPlatform implements DynamicPlatformPlugin {
       accInfo.setCharacteristic(hap.Characteristic.Manufacturer, 'Linak');
       accInfo.setCharacteristic(hap.Characteristic.Model, accessory.context.modelName);
       accInfo.setCharacteristic(hap.Characteristic.SerialNumber, accessory.context.address);
-      accInfo.setCharacteristic(hap.Characteristic.FirmwareRevision, 'REPLACE WITH VERSION');
+      accInfo.setCharacteristic(hap.Characteristic.FirmwareRevision, VERSION);
     }
 
     let service = accessory.getService(hap.Service.WindowCovering);

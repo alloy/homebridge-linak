@@ -20,7 +20,8 @@
   "scripts": {
     "lint": "eslint src/**.ts --max-warnings=0",
     "watch": "npm run build && npm link && nodemon",
-    "build": "tsc",
+    "build": "tsc && sed -i '' \"s/REPLACE WITH VERSION/$(node -e 'console.log(require(\"./package.json\").version)')-$(git rev-parse --short HEAD)/g\" dist/constants.js",
+    "build:commit": "([ -z \"$(git status -s)\" ] || (echo '[!] Commit changes' && exit 1)) && npm run build && git commit ./dist -m \"Build $(node -e 'console.log(require(\"./dist/constants\").VERSION)')\"",
     "build:reload": "runuser -u pi -- npm run build && hb-service restart",
     "build:clean": "rimraf ./dist && npm run build",
     "prepublishOnly": "npm run lint && npm run build:clean"

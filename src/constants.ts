@@ -7,3 +7,5 @@ export const PLATFORM_NAME = 'LinakDeskControl';
  * This must match the name of your plugin as defined the package.json
  */
 export const PLUGIN_NAME = 'homebridge-linak';
+
+export const VERSION = 'REPLACE WITH VERSION';
