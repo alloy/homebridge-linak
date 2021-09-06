@@ -1,8 +1,17 @@
-import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic, PlatformAccessoryEvent } from 'homebridge';
+import {
+  API,
+  DynamicPlatformPlugin,
+  Logger,
+  PlatformAccessory,
+  PlatformConfig,
+  Service,
+  Characteristic,
+  PlatformAccessoryEvent,
+} from "homebridge";
 
-import { PLATFORM_NAME, PLUGIN_NAME, VERSION } from './constants';
+import { PLATFORM_NAME, PLUGIN_NAME, VERSION } from "./constants";
 
-import * as deskbluez from 'deskbluez';
+import * as deskbluez from "deskbluez";
 
 interface DeskConfig {
   name: string;
@@ -16,10 +25,10 @@ interface LinakDeskControlPlatformConfig extends PlatformConfig {
 
 export type LinakDeskPlatformAccessory = PlatformAccessory<DeskConfig>;
 
-
 export class LinakDeskControlPlatform implements DynamicPlatformPlugin {
   public readonly Service: typeof Service = this.api.hap.Service;
-  public readonly Characteristic: typeof Characteristic = this.api.hap.Characteristic;
+  public readonly Characteristic: typeof Characteristic =
+    this.api.hap.Characteristic;
 
   // this is used to track restored cached accessories
   public readonly accessories: LinakDeskPlatformAccessory[] = [];
@@ -30,13 +39,13 @@ export class LinakDeskControlPlatform implements DynamicPlatformPlugin {
   constructor(
     public readonly log: Logger,
     config: PlatformConfig,
-    public readonly api: API,
+    public readonly api: API
   ) {
     this.config = config as LinakDeskControlPlatformConfig;
     this.bluetooth = new deskbluez.Bluetooth();
-    this.log.debug('Finished initializing platform:', this.config.name);
-    this.log.debug('Desks:', JSON.stringify(this.config.desks));
-    this.api.on('didFinishLaunching', this.didFinishLaunching.bind(this));
+    this.log.debug("Finished initializing platform:", this.config.name);
+    this.log.debug("Desks:", JSON.stringify(this.config.desks));
+    this.api.on("didFinishLaunching", this.didFinishLaunching.bind(this));
   }
 
   /**
@@ -44,7 +53,7 @@ export class LinakDeskControlPlatform implements DynamicPlatformPlugin {
    * It should be used to setup event handlers for characteristics and update respective values.
    */
   configureAccessory(accessory: LinakDeskPlatformAccessory) {
-    this.log.info('Loading accessory from cache:', accessory.displayName);
+    this.log.info("Loading accessory from cache:", accessory.displayName);
 
     // add the restored accessory to the accessories cache so we can track if it has already been registered
     this.accessories.push(accessory);
@@ -55,44 +64,57 @@ export class LinakDeskControlPlatform implements DynamicPlatformPlugin {
   // in order to ensure they weren't added to homebridge already. This event can also be used
   // to start discovery of new accessories.
   didFinishLaunching() {
-    this.log.debug('Executed didFinishLaunching callback');
+    this.log.debug("Executed didFinishLaunching callback");
 
-    this.config.desks.forEach(desk => {
+    this.config.desks.forEach((desk) => {
       const uuid = this.api.hap.uuid.generate(desk.address);
-      this.log.debug('Linak Desk:', JSON.stringify({ ...desk, uuid }));
-      let accessory = this.accessories.find(accessory => accessory.UUID === uuid);
+      this.log.debug("Linak Desk:", JSON.stringify({ ...desk, uuid }));
+      let accessory = this.accessories.find(
+        (accessory) => accessory.UUID === uuid
+      );
       if (accessory) {
-        this.log.info('Restoring existing desk accessory from cache:', accessory.displayName);
+        this.log.info(
+          "Restoring existing desk accessory from cache:",
+          accessory.displayName
+        );
         // TODO: this.setupAccessory(accessory); Is this necessary or what is cached?
         this.setupAccessory(accessory);
       } else {
-        this.log.info('Adding new desk accessory:', desk.name);
+        this.log.info("Adding new desk accessory:", desk.name);
         accessory = new this.api.platformAccessory<DeskConfig>(desk.name, uuid);
         accessory.context = desk;
         this.setupAccessory(accessory);
-        this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+        this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [
+          accessory,
+        ]);
       }
     });
   }
 
   setupAccessory(accessory: LinakDeskPlatformAccessory) {
     accessory.on(PlatformAccessoryEvent.IDENTIFY, () => {
-      this.log.info('Identify requested.', accessory.displayName);
+      this.log.info("Identify requested.", accessory.displayName);
     });
 
     const hap = this.api.hap;
 
     const accInfo = accessory.getService(hap.Service.AccessoryInformation);
     if (accInfo) {
-      accInfo.setCharacteristic(hap.Characteristic.Manufacturer, 'Linak');
-      accInfo.setCharacteristic(hap.Characteristic.Model, accessory.context.modelName);
-      accInfo.setCharacteristic(hap.Characteristic.SerialNumber, accessory.context.address);
+      accInfo.setCharacteristic(hap.Characteristic.Manufacturer, "Linak");
+      accInfo.setCharacteristic(
+        hap.Characteristic.Model,
+        accessory.context.modelName
+      );
+      accInfo.setCharacteristic(
+        hap.Characteristic.SerialNumber,
+        accessory.context.address
+      );
       accInfo.setCharacteristic(hap.Characteristic.FirmwareRevision, VERSION);
     }
 
     let service = accessory.getService(hap.Service.WindowCovering);
     if (service) {
-      this.log.debug('Removing existing desk service');
+      this.log.debug("Removing existing desk service");
       accessory.removeService(service);
     }
 
@@ -100,24 +122,40 @@ export class LinakDeskControlPlatform implements DynamicPlatformPlugin {
      * Working with blinds, taken from https://github.com/dxdc/homebridge-blinds/blob/master/index.js
      */
     service = new hap.Service.WindowCovering(accessory.context.name);
-    service.getCharacteristic(hap.Characteristic.CurrentPosition).on('get', async (callback) => {
-      // const desk = await this.connectDesk(accessory.context);
-      // const state = await desk.state();
-      // await desk.disconnect();
-      // callback(null, state.cm);
-      callback(null, 60);
-    });
+    // Set initial state
+    service
+      .getCharacteristic(hap.Characteristic.CurrentPosition)
+      .updateValue(42);
+    service
+      .getCharacteristic(hap.Characteristic.PositionState)
+      .updateValue(hap.Characteristic.PositionState.STOPPED);
+    service
+      .getCharacteristic(hap.Characteristic.ObstructionDetected)
+      .updateValue(false);
+    // Setup event listeners
+    service
+      .getCharacteristic(hap.Characteristic.CurrentPosition)
+      .on("get", async (callback) => {
+        // const desk = await this.connectDesk(accessory.context);
+        // const state = await desk.state();
+        // await desk.disconnect();
+        // callback(null, state.cm);
+        callback(null, 60);
+      });
+    service
+      .getCharacteristic(hap.Characteristic.PositionState)
+      .on("get", async (callback) => {
+        callback(null, hap.Characteristic.PositionState.STOPPED);
+      });
     service
       .getCharacteristic(hap.Characteristic.TargetPosition)
-      .on('get', (callback) => {
-        this.log.info('Get desk target height');
+      .on("get", (callback) => {
+        this.log.info("Get desk target height");
         callback(null, 60);
       })
-      .on('set', (value) => {
-        this.log.info('Set desk target height:', value.valueOf());
+      .on("set", (value) => {
+        this.log.info("Set desk target height:", value.valueOf());
       });
-    service.getCharacteristic(hap.Characteristic.PositionState).updateValue(hap.Characteristic.PositionState.STOPPED);
-    service.getCharacteristic(hap.Characteristic.ObstructionDetected).updateValue(false);
   }
 
   /**
@@ -127,7 +165,10 @@ export class LinakDeskControlPlatform implements DynamicPlatformPlugin {
 
   private async connectDesk(deskConfig: DeskConfig) {
     const model = deskbluez.factory.getDeskModel(deskConfig.modelName);
-    this.log.debug('Connecting to desk:', JSON.stringify({ deskConfig, model }));
+    this.log.debug(
+      "Connecting to desk:",
+      JSON.stringify({ deskConfig, model })
+    );
     await this.bluetooth.startDiscovery();
     const bluetoothDevice = await this.bluetooth.connect(deskConfig.address);
     await this.bluetooth.stopDiscovery();
