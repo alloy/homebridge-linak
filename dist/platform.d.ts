@@ -1,4 +1,4 @@
-import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic } from "homebridge";
+import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service } from "homebridge";
 import * as deskbluez from "deskbluez";
 interface DeskConfig {
     name: string;
@@ -12,11 +12,10 @@ export declare type LinakDeskPlatformAccessory = PlatformAccessory<DeskConfig>;
 export declare class LinakDeskControlPlatform implements DynamicPlatformPlugin {
     readonly log: Logger;
     readonly api: API;
-    readonly Service: typeof Service;
-    readonly Characteristic: typeof Characteristic;
     readonly accessories: LinakDeskPlatformAccessory[];
     readonly config: LinakDeskControlPlatformConfig;
     readonly bluetooth: deskbluez.Bluetooth;
+    service: Service | undefined;
     constructor(log: Logger, config: PlatformConfig, api: API);
     /**
      * This function is invoked when homebridge restores cached accessories from disk at startup.
