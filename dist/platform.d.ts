@@ -1,5 +1,5 @@
-import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic } from 'homebridge';
-import * as deskbluez from 'deskbluez';
+import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic } from "homebridge";
+import * as deskbluez from "deskbluez";
 interface DeskConfig {
     name: string;
     address: string;
