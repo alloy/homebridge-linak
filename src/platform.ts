@@ -36,8 +36,6 @@ export class LinakDeskControlPlatform implements DynamicPlatformPlugin {
   public readonly config: LinakDeskControlPlatformConfig;
   public readonly bluetooth: deskbluez.Bluetooth;
 
-  public service: Service | undefined;
-
   constructor(
     public readonly log: Logger,
     config: PlatformConfig,
@@ -114,10 +112,10 @@ export class LinakDeskControlPlatform implements DynamicPlatformPlugin {
       accInfo.setCharacteristic(hap.Characteristic.FirmwareRevision, VERSION);
     }
 
-    this.service = accessory.getService(hap.Service.WindowCovering);
-    if (this.service) {
+    let service = accessory.getService(hap.Service.WindowCovering);
+    if (service) {
       this.log.debug("Removing existing desk service");
-      accessory.removeService(this.service);
+      accessory.removeService(service);
     }
 
     /**
@@ -125,19 +123,19 @@ export class LinakDeskControlPlatform implements DynamicPlatformPlugin {
      * - https://github.com/dxdc/homebridge-blinds/blob/master/index.js
      * - https://github.com/hjdhjd/homebridge-blinds-cmd/blob/master/src/blindsCmd-blind.ts
      */
-    this.service = new hap.Service.WindowCovering(accessory.context.name);
+    service = new hap.Service.WindowCovering(accessory.context.name);
     // Set initial state
-    this.service
+    service
       .getCharacteristic(hap.Characteristic.CurrentPosition)
       .updateValue(42);
-    this.service
+    service
       .getCharacteristic(hap.Characteristic.PositionState)
       .updateValue(hap.Characteristic.PositionState.STOPPED);
-    this.service
+    service
       .getCharacteristic(hap.Characteristic.ObstructionDetected)
       .updateValue(false);
     // Setup event listeners
-    this.service
+    service
       .getCharacteristic(hap.Characteristic.CurrentPosition)
       .on("get", async (callback) => {
         // const desk = await this.connectDesk(accessory.context);
@@ -146,12 +144,12 @@ export class LinakDeskControlPlatform implements DynamicPlatformPlugin {
         // callback(null, state.cm);
         callback(null, 60);
       });
-    this.service
+    service
       .getCharacteristic(hap.Characteristic.PositionState)
       .on("get", async (callback) => {
         callback(null, hap.Characteristic.PositionState.STOPPED);
       });
-    this.service
+    service
       .getCharacteristic(hap.Characteristic.TargetPosition)
       .on("get", (callback) => {
         this.log.info("Get desk target height");
@@ -160,6 +158,8 @@ export class LinakDeskControlPlatform implements DynamicPlatformPlugin {
       .on("set", (value) => {
         this.log.info("Set desk target height:", value.valueOf());
       });
+
+    accessory.addService(service);
   }
 
   /**
