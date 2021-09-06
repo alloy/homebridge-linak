@@ -2,7 +2,7 @@
   "private": true,
   "displayName": "Linak Desk Control",
   "name": "homebridge-linak",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "A short description about what your plugin does.",
   "license": "MIT",
   "repository": {
