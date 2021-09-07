@@ -9,5 +9,5 @@ exports.PLATFORM_NAME = 'LinakDeskControl';
  * This must match the name of your plugin as defined the package.json
  */
 exports.PLUGIN_NAME = 'homebridge-linak';
-exports.VERSION = '0.6.0';
+exports.VERSION = '0.7.0';
 //# sourceMappingURL=constants.js.map
