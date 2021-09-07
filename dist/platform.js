@@ -22,6 +22,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.LinakDeskControlPlatform = void 0;
 const constants_1 = require("./constants");
 const deskbluez = __importStar(require("deskbluez"));
+const AbstractDesk_1 = require("deskbluez/dist/desks/AbstractDesk");
 class LinakDeskControlPlatform {
     constructor(log, config, api) {
         this.log = log;
@@ -128,6 +129,7 @@ class LinakDeskControlPlatform {
         })
             .on("set", (value) => {
             this.log.info("Set desk target height:", value.valueOf());
+            this.actionMoveTo(accessory, value.valueOf());
         });
         accessory.addService(service);
     }
@@ -135,6 +137,20 @@ class LinakDeskControlPlatform {
      * Code taken largely verbatim from https://github.com/alex20465/deskbluez/blob/master/src/lib/cli.ts
      * TODO: Refactor deskbluez to make these available as a lib instead of defined in CLI
      */
+    async actionMoveTo(accessory, pos) {
+        const desk = await this.connectDesk(accessory.context);
+        const completed = await desk.moveTo(pos, AbstractDesk_1.LENGTH_UNITS.PCT);
+        if (completed === false) {
+            // if not completed possible resistance detected.
+            this.log.warn("Resistance detected, stop action for safety.");
+            // const hap = this.api.hap;
+            // const service = accessory.getService(this.api.hap.Service.WindowCovering);
+            // assert(service);
+            // service
+            //   .getCharacteristic(hap.Characteristic.PositionState)
+            //   .updateValue(hap.Characteristic.PositionState.STOPPED);
+        }
+    }
     async connectDesk(deskConfig) {
         const model = deskbluez.factory.getDeskModel(deskConfig.modelName);
         this.log.debug("Connecting to desk:", JSON.stringify({ deskConfig, model }));

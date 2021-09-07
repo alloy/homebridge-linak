@@ -27,6 +27,7 @@ export declare class LinakDeskControlPlatform implements DynamicPlatformPlugin {
      * Code taken largely verbatim from https://github.com/alex20465/deskbluez/blob/master/src/lib/cli.ts
      * TODO: Refactor deskbluez to make these available as a lib instead of defined in CLI
      */
+    private actionMoveTo;
     private connectDesk;
 }
 export {};
