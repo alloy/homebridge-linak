@@ -12,6 +12,8 @@ import {
 import { PLATFORM_NAME, PLUGIN_NAME, VERSION } from "./constants";
 
 import * as deskbluez from "deskbluez";
+import { LENGTH_UNITS } from "deskbluez/dist/desks/AbstractDesk";
+import assert from "assert";
 
 interface DeskConfig {
   name: string;
@@ -157,6 +159,7 @@ export class LinakDeskControlPlatform implements DynamicPlatformPlugin {
       })
       .on("set", (value) => {
         this.log.info("Set desk target height:", value.valueOf());
+        this.actionMoveTo(accessory, value.valueOf() as number);
       });
 
     accessory.addService(service);
@@ -166,6 +169,26 @@ export class LinakDeskControlPlatform implements DynamicPlatformPlugin {
    * Code taken largely verbatim from https://github.com/alex20465/deskbluez/blob/master/src/lib/cli.ts
    * TODO: Refactor deskbluez to make these available as a lib instead of defined in CLI
    */
+
+  private async actionMoveTo(
+    accessory: LinakDeskPlatformAccessory,
+    pos: number
+  ) {
+    const desk = await this.connectDesk(accessory.context);
+    const completed = await desk.moveTo(pos, LENGTH_UNITS.PCT);
+
+    if (completed === false) {
+      // if not completed possible resistance detected.
+      this.log.warn("Resistance detected, stop action for safety.");
+
+      // const hap = this.api.hap;
+      // const service = accessory.getService(this.api.hap.Service.WindowCovering);
+      // assert(service);
+      // service
+      //   .getCharacteristic(hap.Characteristic.PositionState)
+      //   .updateValue(hap.Characteristic.PositionState.STOPPED);
+    }
+  }
 
   private async connectDesk(deskConfig: DeskConfig) {
     const model = deskbluez.factory.getDeskModel(deskConfig.modelName);

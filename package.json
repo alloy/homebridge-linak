@@ -30,7 +30,7 @@
     "homebridge-plugin"
   ],
   "dependencies": {
-    "deskbluez": "^2.1.0"
+    "deskbluez": "github:alloy/deskbluez#alloy/add-percentage-support"
   },
   "devDependencies": {
     "@types/node": "^14.14.31",
