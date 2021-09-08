@@ -154,6 +154,7 @@ class LinakDeskControlPlatform {
     async connectDesk(deskConfig) {
         const model = deskbluez.factory.getDeskModel(deskConfig.modelName);
         this.log.debug("Connecting to desk:", JSON.stringify({ deskConfig, model }));
+        await this.bluetooth.init(); // TODO: Do we ever need to specify other adapters?
         await this.bluetooth.startDiscovery();
         const bluetoothDevice = await this.bluetooth.connect(deskConfig.address);
         await this.bluetooth.stopDiscovery();
