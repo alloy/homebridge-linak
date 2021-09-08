@@ -196,6 +196,7 @@ export class LinakDeskControlPlatform implements DynamicPlatformPlugin {
       "Connecting to desk:",
       JSON.stringify({ deskConfig, model })
     );
+    await this.bluetooth.init(); // TODO: Do we ever need to specify other adapters?
     await this.bluetooth.startDiscovery();
     const bluetoothDevice = await this.bluetooth.connect(deskConfig.address);
     await this.bluetooth.stopDiscovery();
